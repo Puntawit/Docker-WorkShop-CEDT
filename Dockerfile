@@ -6,6 +6,13 @@ RUN npm ci --omit=dev
 COPY app/ ./
 
 FROM node:20.11-slim
+# Patch the workshop base OS and keep build-only package managers out of runtime.
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /usr/local/lib/node_modules /opt/yarn* \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+             /usr/local/bin/yarn /usr/local/bin/yarnpkg
 WORKDIR /app
 COPY --from=builder /app /app
 ENV NODE_ENV=production
